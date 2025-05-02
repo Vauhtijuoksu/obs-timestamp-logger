@@ -77,7 +77,7 @@ def log_transition(end=False):
     with open(obs.obs_data_get_string(data["settings"], "logfile"), "a") as logfile:
         logfile.write(
             f"[{timestamp.isoformat()}] {since_start.total_seconds()} "
-            f"{event} {data["current_game"]}\n"
+            f"{event} {data['current_game']}\n"
         )
 
 def set_game():
