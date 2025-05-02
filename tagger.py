@@ -17,7 +17,8 @@ import obspython as obs
 data = {
     "settings": None,
     "in_game_scene": False,
-    "current_game": None
+    "current_game": None,
+    "recording_start": None,
 }
 
 
@@ -58,7 +59,7 @@ def script_description():
     Called when the script is loaded, shows its description.
     """
 
-    return "Logs timestamp and game ID from API when switching to and from specified scene."
+    return "Logs timestamp and game ID from API when switching to and from specified scenes."
 
 
 # Tool functions
@@ -70,11 +71,13 @@ def log_transition(end=False):
     transition is tagged as game starting or ending.
     """
 
-    timestamp = datetime.datetime.now().isoformat()
+    timestamp = datetime.datetime.now()
     event = ["START", "END"][end]
+    since_start = timestamp - data["recording_start"]
     with open(obs.obs_data_get_string(data["settings"], "logfile"), "a") as logfile:
         logfile.write(
-            f"[{timestamp}] {event} {data["current_game"]}\n"
+            f"[{timestamp.isoformat()}] {since_start.total_seconds()} "
+            f"{event} {data["current_game"]}\n"
         )
 
 def set_game():
@@ -115,12 +118,13 @@ def handle_event(event):
         obs.obs_data_array_release(game_scene_array)
 
         if not data["in_game_scene"] and scene_name in game_scenes:
-            print("Entering game")
             set_game()
             log_transition()
             data["in_game_scene"] = True
         elif data["in_game_scene"] and scene_name not in game_scenes:
-            print("Leaving game")
             log_transition(end=True)
             data["in_game_scene"] = False
+    elif event == obs.OBS_FRONTEND_EVENT_RECORDING_STARTED:
+        data["recording_start"] = datetime.datetime.now()
+
 
