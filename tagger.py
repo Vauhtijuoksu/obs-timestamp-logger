@@ -89,6 +89,7 @@ def set_game():
     if resp.status_code == 200:
         data["current_game"] = resp.json()["current_game_id"]
     else:
+        data["current_game"] = "--Unknown--"
         print("Failed to get data from API")
 
 
